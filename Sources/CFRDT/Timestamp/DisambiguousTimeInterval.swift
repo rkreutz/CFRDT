@@ -4,7 +4,7 @@ public struct DisambiguousTimeInterval: Timestampable, Identifiable {
 
     public static func tick() -> DisambiguousTimeInterval { DisambiguousTimeInterval() }
 
-    public var id: UUID = UUID()
+    public var id = UUID()
     public var timeInterval: TimeInterval = Date().timeIntervalSince1970
 
     public mutating func tick() {

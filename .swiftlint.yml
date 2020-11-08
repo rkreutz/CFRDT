@@ -73,6 +73,7 @@ opt_in_rules: # some rules are only opt-in
 excluded: # paths to ignore during linting. Takes precedence over `included`.
 - Package.swift
 - .build/
+- Tests/
 
 # configurable rules can be customized from this configuration file
 
