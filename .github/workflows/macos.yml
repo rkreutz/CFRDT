@@ -1,0 +1,26 @@
+name: MacOS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: YOCKOW/Action-setup-swift@master
+      with:
+        swift-version: '5.3'
+    - name: Prepare Build
+      run: brew bundle
+    - name: SwiftLint
+      run: swiftlint --strict
+    - name: Build
+      run: swift build -v
+    - name: Run tests
+      run: swift test -v
