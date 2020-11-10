@@ -1,7 +1,7 @@
 import Foundation
 
 /// Time based Last-Writter-Wins Register
-public typealias TLWWRegister<Value> = LWWRegister<Value, DisambiguousTimeInterval>
+public typealias ReplicatingRegister<Value> = LWWRegister<Value, DisambiguousTimeInterval>
 
 /// Last-Writer-Wins Register
 public struct LWWRegister<Value, Timestamp: Timestampable> {
