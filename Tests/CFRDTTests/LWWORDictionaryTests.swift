@@ -211,4 +211,18 @@ final class LWWORDictionaryTests: XCTestCase {
         XCTAssertEqual(d.dictionary, a.dictionary)
     }
 
+    static var allTests = [
+        ("testInitialCreation", testInitialCreation),
+        ("testInserting", testInserting),
+        ("testReplacing", testReplacing),
+        ("testRemoving", testRemoving),
+        ("testInterleavedInsertAndRemove", testInterleavedInsertAndRemove),
+        ("testMergeOfInitiallyUnrelated", testMergeOfInitiallyUnrelated),
+        ("testMultipleMerges", testMultipleMerges),
+        ("testIdempotency", testIdempotency),
+        ("testCommutivity", testCommutivity),
+        ("testAssociativity", testAssociativity),
+        ("testNonAtomicMergingOfReplicatingValues", testNonAtomicMergingOfReplicatingValues),
+        ("testCodable", testCodable),
+    ]
 }
