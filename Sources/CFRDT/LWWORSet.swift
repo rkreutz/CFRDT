@@ -15,14 +15,10 @@ public struct LWWORSet<Value: Hashable, Timestamp: Timestampable> {
     public var values: Set<Value> { internalSet }
     public var count: Int { internalSet.count }
 
-    private var metadata: Dictionary<Int, Metadata> = [:]
+    private var metadata = [Int: Metadata]()
     private var internalSet: Set<Value> = []
 
-    public init() {
-
-        metadata = [:]
-        internalSet = []
-    }
+    public init() {}
 
     public init(array elements: [Value]) {
 
@@ -30,7 +26,8 @@ public struct LWWORSet<Value: Hashable, Timestamp: Timestampable> {
         elements.forEach { self.insert($0) }
     }
 
-    @discardableResult public mutating func insert(_ value: Value) -> Bool {
+    @discardableResult
+    public mutating func insert(_ value: Value) -> Bool {
 
         var isNewInsert = false
         let hashValue = value.hashValue
@@ -52,7 +49,8 @@ public struct LWWORSet<Value: Hashable, Timestamp: Timestampable> {
         return isNewInsert
     }
 
-    @discardableResult public mutating func remove(_ value: Value) -> Value? {
+    @discardableResult
+    public mutating func remove(_ value: Value) -> Value? {
 
         let hashValue = value.hashValue
 
@@ -76,7 +74,7 @@ extension LWWORSet: Replicable {
 
         var result = self
 
-        result.metadata = other.metadata.reduce(into: metadata) { (result, keyValuePair) in
+        result.metadata = other.metadata.reduce(into: metadata) { result, keyValuePair in
 
             let firstMetadata = result[keyValuePair.key]
             let secondMetadata = keyValuePair.value
@@ -95,12 +93,10 @@ extension LWWORSet: Replicable {
 
         return result
     }
-
 }
 
 extension LWWORSet.Metadata: Codable where Value: Codable {}
 extension LWWORSet: Codable where Value: Codable {}
-
 
 extension LWWORSet: ExpressibleByArrayLiteral {
 
