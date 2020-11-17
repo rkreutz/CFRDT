@@ -11,7 +11,7 @@ public struct LTArray<Element, Timestamp: Timestampable> {
         var anchor: ID?
         var value: Element?
         var timestamp: Timestamp = .tick()
-        var id: UUID = UUID()
+        var id = UUID()
 
         var isDeleted: Bool { value == nil }
 
@@ -31,19 +31,19 @@ public struct LTArray<Element, Timestamp: Timestampable> {
 
     public init() {}
 
-    mutating public func insert(_ newValue: Element, at index: Int) {
+    public mutating func insert(_ newValue: Element, at index: Int) {
 
         let new = makeEntry(withValue: newValue, forInsertingAtIndex: index)
         entries.insert(new, at: index)
     }
 
-    mutating public func append(_ newValue: Element) { insert(newValue, at: entries.count) }
+    public mutating func append(_ newValue: Element) { insert(newValue, at: entries.count) }
 
     @discardableResult
-    mutating public func remove(at index: Int) -> Element {
+    public mutating func remove(at index: Int) -> Element {
 
         var entry = entries[index]
-        let value = entry.value!
+        let value = entry.value! //swiftlint:disable:this force_unwrapping
         entry.value = nil
         entry.tick()
         tombstones.append(entry)
@@ -78,7 +78,7 @@ extension LTArray: Replicable {
 
     private static func ordered(fromEntries entries: [Entry], tombstones: [Entry]) -> [Entry] {
 
-        let anchoredByAnchorId = Dictionary<Entry.ID?, [Entry]>.init(
+        let anchoredByAnchorId = [Entry.ID?: [Entry]](
             grouping: (entries + tombstones).sorted(by: { $0.ordered(beforeSibling: $1) }),
             by: { $0.anchor }
         )
@@ -99,7 +99,6 @@ extension LTArray: Replicable {
         addDecendants(of: roots)
         return result
     }
-
 }
 
 extension LTArray.Entry: Codable where Element: Codable {}
@@ -115,18 +114,18 @@ extension LTArray: ExpressibleByArrayLiteral {
 
 extension LTArray: Collection, RandomAccessCollection {
 
-    public var startIndex: Int { return entries.startIndex }
-    public var endIndex: Int { return entries.endIndex }
-    public func index(after i: Int) -> Int { entries.index(after: i) }
+    public var startIndex: Int { entries.startIndex }
+    public var endIndex: Int { entries.endIndex }
+    public func index(after index: Int) -> Int { entries.index(after: index) }
 
-    public subscript(_ i: Int) -> Element {
+    public subscript(_ index: Int) -> Element {
 
-        get { entries[i].value! }
+        get { entries[index].value! } //swiftlint:disable:this force_unwrapping
         set {
 
-            remove(at: i)
-            let newEntry = makeEntry(withValue: newValue, forInsertingAtIndex: i)
-            entries.insert(newEntry, at: i)
+            remove(at: index)
+            let newEntry = makeEntry(withValue: newValue, forInsertingAtIndex: index)
+            entries.insert(newEntry, at: index)
         }
     }
 }
@@ -135,7 +134,7 @@ private extension LTArray {
 
     func makeEntry(withValue value: Element, forInsertingAtIndex index: Int) -> Entry {
 
-        let anchor = index > 0 ? entries[index-1].id : nil
+        let anchor = index > 0 ? entries[index - 1].id : nil
         return Entry(anchor: anchor, value: value)
     }
 }
@@ -147,5 +146,4 @@ private extension Array {
         var encountered: Set<AnyHashable> = []
         return filter { encountered.insert(block($0)).inserted }
     }
-
 }

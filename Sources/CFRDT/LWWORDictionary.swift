@@ -162,7 +162,8 @@ extension LWWORDictionary: ExpressibleByDictionaryLiteral {
 
 extension LWWORDictionary: Sequence {
 
-    @inlinable public func makeIterator() -> Dictionary<Key, Value>.Iterator {
+    @inlinable
+    public func makeIterator() -> Dictionary<Key, Value>.Iterator {
 
         dictionary.makeIterator()
     }
