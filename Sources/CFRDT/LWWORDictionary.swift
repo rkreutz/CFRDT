@@ -160,33 +160,6 @@ extension LWWORDictionary: ExpressibleByDictionaryLiteral {
     }
 }
 
-extension LWWORDictionary: Collection {
-
-    @inlinable public var isEmpty: Bool { dictionary.isEmpty }
-    @inlinable public var startIndex: Dictionary<Key, Value>.Index { dictionary.startIndex }
-    @inlinable public var endIndex: Dictionary<Key, Value>.Index { dictionary.endIndex }
-
-    @inlinable public subscript(position: Dictionary<Key, Value>.Index) -> Dictionary<Key, Value>.Element {
-
-        get { dictionary[position] }
-    }
-
-    @inlinable public func index(after i: Dictionary<Key, Value>.Index) -> Dictionary<Key, Value>.Index {
-
-        dictionary.index(after: i)
-    }
-
-    @inlinable public func formIndex(after i: inout Dictionary<Key, Value>.Index) {
-
-        dictionary.formIndex(after: &i)
-    }
-
-    @inlinable public func index(forKey key: Key) -> Dictionary<Key, Value>.Index? {
-
-        dictionary.index(forKey: key)
-    }
-}
-
 extension LWWORDictionary: Sequence {
 
     @inlinable public func makeIterator() -> Dictionary<Key, Value>.Iterator {
