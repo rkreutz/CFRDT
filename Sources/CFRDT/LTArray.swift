@@ -37,7 +37,17 @@ public struct LTArray<Element, Timestamp: Timestampable> {
         entries.insert(new, at: index)
     }
 
+    public mutating func insert<Sequence: Swift.Sequence>(contentsOf sequence: Sequence, at index: Int) where Sequence.Element == Element {
+
+        sequence.reversed().forEach { insert($0, at: index) }
+    }
+
     public mutating func append(_ newValue: Element) { insert(newValue, at: entries.count) }
+
+    public mutating func append<Sequence: Swift.Sequence>(contentsOf sequence: Sequence) where Sequence.Element == Element {
+
+        sequence.forEach { append($0) }
+    }
 
     @discardableResult
     public mutating func remove(at index: Int) -> Element {
@@ -49,6 +59,41 @@ public struct LTArray<Element, Timestamp: Timestampable> {
         tombstones.append(entry)
         entries.remove(at: index)
         return value
+    }
+
+    public subscript(bounds: Range<Int>) -> LTArray<Element, Timestamp> {
+
+        get { LTArray(Slice(base: self, bounds: bounds)) }
+
+        set {
+
+            bounds.reversed().forEach { remove(at: $0) }
+            insert(contentsOf: newValue, at: bounds.lowerBound)
+        }
+    }
+
+    public subscript(bounds: ClosedRange<Int>) -> LTArray<Element, Timestamp> {
+
+        get { self[Range(bounds)] }
+        set { self[Range(bounds)] = newValue }
+    }
+
+    public subscript(bounds: PartialRangeFrom<Int>) -> LTArray<Element, Timestamp> {
+
+        get { self[Range(uncheckedBounds: (bounds.lowerBound, count))] }
+        set { self[Range(uncheckedBounds: (bounds.lowerBound, count))] = newValue }
+    }
+
+    public subscript(bounds: PartialRangeUpTo<Int>) -> LTArray<Element, Timestamp> {
+
+        get { self[Range(uncheckedBounds: (0, bounds.upperBound))] }
+        set { self[Range(uncheckedBounds: (0, bounds.upperBound))] = newValue }
+    }
+
+    public subscript(bounds: PartialRangeThrough<Int>) -> LTArray<Element, Timestamp> {
+
+        get { self[ClosedRange(uncheckedBounds: (0, bounds.upperBound))] }
+        set { self[ClosedRange(uncheckedBounds: (0, bounds.upperBound))] = newValue }
     }
 }
 
@@ -101,6 +146,14 @@ extension LTArray: Replicable {
     }
 }
 
+extension LTArray: Equatable where Element: Equatable {
+
+    public static func == (lhs: LTArray<Element, Timestamp>, rhs: LTArray<Element, Timestamp>) -> Bool {
+
+        lhs.values == rhs.values
+    }
+}
+
 extension LTArray.Entry: Codable where Element: Codable {}
 extension LTArray: Codable where Element: Codable {}
 
@@ -108,7 +161,7 @@ extension LTArray: ExpressibleByArrayLiteral {
 
     public init(arrayLiteral elements: Element...) {
 
-        elements.forEach { self.append($0) }
+        elements.forEach { append($0) }
     }
 }
 
@@ -127,6 +180,14 @@ extension LTArray: Collection, RandomAccessCollection {
             let newEntry = makeEntry(withValue: newValue, forInsertingAtIndex: index)
             entries.insert(newEntry, at: index)
         }
+    }
+}
+
+extension LTArray {
+
+    init<Sequence: Swift.Sequence>(_ sequence: Sequence) where Sequence.Element == Element {
+
+        sequence.forEach { append($0) }
     }
 }
 

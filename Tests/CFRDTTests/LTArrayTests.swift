@@ -20,14 +20,14 @@ final class LTArrayTests: XCTestCase {
         a.append(1)
         a.append(2)
         a.append(3)
-        XCTAssertEqual(a.values, [1,2,3])
+        XCTAssertEqual(a, [1,2,3])
     }
 
     func testInserting() {
         a.insert(1, at: 0)
         a.insert(2, at: 0)
         a.insert(3, at: 0)
-        XCTAssertEqual(a.values, [3,2,1])
+        XCTAssertEqual(a, [3,2,1])
     }
 
     func testRemoving() {
@@ -35,7 +35,7 @@ final class LTArrayTests: XCTestCase {
         a.append(2)
         a.append(3)
         a.remove(at: 1)
-        XCTAssertEqual(a.values, [1,3])
+        XCTAssertEqual(a, [1,3])
         XCTAssertEqual(a.count, 2)
     }
 
@@ -49,7 +49,7 @@ final class LTArrayTests: XCTestCase {
         a.append(2)
         a.remove(at: 1) // [3,2]
         a.append(3)
-        XCTAssertEqual(a.values, [3,2,3])
+        XCTAssertEqual(a, [3,2,3])
     }
 
     func testMergeOfInitiallyUnrelated() {
@@ -65,7 +65,7 @@ final class LTArrayTests: XCTestCase {
         b.append(9)
 
         let c = a.merged(with: b)
-        XCTAssertEqual(c.values, [7,8,9,1,2,3])
+        XCTAssertEqual(c, [7,8,9,1,2,3])
     }
 
     func testMergeWithRemoves() {
@@ -82,7 +82,7 @@ final class LTArrayTests: XCTestCase {
         b.remove(at: 1)
 
         let d = b.merged(with: a)
-        XCTAssertEqual(d.values, [7,9,1,3])
+        XCTAssertEqual(d, [7,9,1,3])
     }
 
     func testMultipleMerges() {
@@ -100,7 +100,7 @@ final class LTArrayTests: XCTestCase {
 
         a.append(6)
 
-        XCTAssertEqual(a.merged(with: b).values, [1,1,2,3,6,5])
+        XCTAssertEqual(a.merged(with: b), [1,1,2,3,6,5])
     }
 
     func testIdempotency() {
@@ -119,8 +119,8 @@ final class LTArrayTests: XCTestCase {
         let c = a.merged(with: b)
         let d = c.merged(with: b)
         let e = c.merged(with: a)
-        XCTAssertEqual(c.values, d.values)
-        XCTAssertEqual(c.values, e.values)
+        XCTAssertEqual(c, d)
+        XCTAssertEqual(c, e)
     }
 
     func testCommutivity() {
@@ -138,8 +138,8 @@ final class LTArrayTests: XCTestCase {
 
         let c = a.merged(with: b)
         let d = b.merged(with: a)
-        XCTAssertEqual(d.values, [7,9,1,3])
-        XCTAssertEqual(d.values, c.values)
+        XCTAssertEqual(d, [7,9,1,3])
+        XCTAssertEqual(d, c)
     }
 
     func testAssociativity() {
@@ -157,7 +157,7 @@ final class LTArrayTests: XCTestCase {
 
         let e = a.merged(with: b).merged(with: c)
         let f = a.merged(with: b.merged(with: c))
-        XCTAssertEqual(e.values, f.values)
+        XCTAssertEqual(e, f)
     }
 
     func testCodable() {
@@ -168,7 +168,70 @@ final class LTArrayTests: XCTestCase {
 
         let data = try! JSONEncoder().encode(a)
         let d = try! JSONDecoder().decode(LTArray<Int, DisambiguousTimeInterval>.self, from: data)
-        XCTAssertEqual(d.values, a.values)
+        XCTAssertEqual(d, a)
+    }
+
+    func testAppendSequence() {
+
+        a.append(contentsOf: [3,2,1])
+        a.append(contentsOf: [4,5,6])
+        XCTAssertEqual(a, [3,2,1,4,5,6])
+    }
+
+    func testInsertSequence() {
+
+        a.append(contentsOf: [1,2,3])
+        a.insert(contentsOf: [4,5,6], at: 1)
+        XCTAssertEqual(a, [1,4,5,6,2,3])
+    }
+
+    func testRangedSubscript() {
+        a.append(contentsOf: [1,2,3,4,5,6])
+        XCTAssertEqual(a[2..<4], [3,4])
+
+        a[1..<4] = LTArray(a[1..<4].reversed())
+        XCTAssertEqual(a, [1,4,3,2,5,6])
+
+        a[0..<3] = [1,2,3,4,5,6]
+        XCTAssertEqual(a, [1,2,3,4,5,6,2,5,6])
+    }
+
+    func testClosedRangeSubscript() {
+
+        a.append(contentsOf: [1,2,3,4,5,6])
+        XCTAssertEqual(a[2...4], [3,4,5])
+
+        a[1...4] = LTArray(a[1...4].reversed())
+        XCTAssertEqual(a, [1,5,4,3,2,6])
+
+        a[0...3] = [1,2,3,4,5,6]
+        XCTAssertEqual(a, [1,2,3,4,5,6,2,6])
+    }
+
+    func testPartialRangeSubscript() {
+
+        a.append(contentsOf: [1,2,3,4,5,6])
+        XCTAssertEqual(a[...3], [1,2,3,4])
+        XCTAssertEqual(a[..<3], [1,2,3])
+        XCTAssertEqual(a[3...], [4,5,6])
+        var a1 = a!, a2 = a!, a3 = a!
+
+        a1[1...] = LTArray<Int, DisambiguousTimeInterval>(a[1...].reversed())
+        a2[...3] = LTArray<Int, DisambiguousTimeInterval>(a[...3].reversed())
+        a3[..<3] = LTArray<Int, DisambiguousTimeInterval>(a[..<3].reversed())
+        XCTAssertEqual(a1, [1,6,5,4,3,2])
+        XCTAssertEqual(a2, [4,3,2,1,5,6])
+        XCTAssertEqual(a3, [3,2,1,4,5,6])
+
+        a1[3...] = [1,2,3,4,5,6]
+        print(a1.values)
+        a2[...3] = [1,2,3,4,5,6]
+        print(a1.values)
+        a3[..<3] = [1,2,3,4,5,6]
+        print(a1.values)
+        XCTAssertEqual(a1, [1,6,5,1,2,3,4,5,6])
+        XCTAssertEqual(a2, [1,2,3,4,5,6,5,6])
+        XCTAssertEqual(a3, [1,2,3,4,5,6,4,5,6])
     }
 
     static var allTests = [
@@ -184,5 +247,10 @@ final class LTArrayTests: XCTestCase {
         ("testCommutivity", testCommutivity),
         ("testAssociativity", testAssociativity),
         ("testCodable", testCodable),
+        ("testAppendSequence", testAppendSequence),
+        ("testInsertSequence", testInsertSequence),
+        ("testRangedSubscript", testRangedSubscript),
+        ("testClosedRangeSubscript", testClosedRangeSubscript),
+        ("testPartialRangeSubscript", testPartialRangeSubscript),
     ]
 }
