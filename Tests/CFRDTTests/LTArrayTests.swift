@@ -255,6 +255,10 @@ final class LTArrayTests: XCTestCase {
         var a5 = [1,2,3,4,5]
         a5.removeAll(where: { $0 % 2 == 0 })
         XCTAssertEqual(a5, [1,3,5])
+
+        var a6 = [1,2,3,4,5]
+        a6.replaceSubrange(1...4, with: [6,7,8,9,10])
+        XCTAssertEqual(a6, [1,6,7,8,9,10])
     }
 
     static var allTests = [

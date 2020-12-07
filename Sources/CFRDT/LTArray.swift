@@ -205,6 +205,14 @@ extension LTArray: RangeReplaceableCollection {
 
         removeSubrange(0 ..< k)
     }
+
+    public mutating func replaceSubrange<Collection: Swift.Collection>(
+        _ subrange: Range<Int>,
+        with newElements: Collection
+    ) where Element == Collection.Element {
+
+        self[subrange] = LTArray(newElements)
+    }
 }
 
 private extension LTArray {
