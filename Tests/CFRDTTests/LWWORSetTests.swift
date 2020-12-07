@@ -35,6 +35,9 @@ final class LWWORSetTests: XCTestCase {
         a.insert(2)
         a.insert(3)
         a.remove(2)
+        XCTAssertEqual(a.contains(1), true)
+        XCTAssertEqual(a.contains(2), false)
+        XCTAssertEqual(a.contains(4), false)
         XCTAssertEqual(a.values, Set([1,3]))
         XCTAssertEqual(a.count, 2)
     }

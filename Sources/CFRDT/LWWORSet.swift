@@ -12,11 +12,21 @@ public struct LWWORSet<Value: Hashable, Timestamp: Timestampable> {
         var timestamp: Timestamp = .tick()
     }
 
-    public var values: Set<Value> { internalSet }
-    public var count: Int { internalSet.count }
+    private var metadata = [Value: Metadata]()
 
-    private var metadata = [Int: Metadata]()
-    private var internalSet: Set<Value> = []
+    public var values: Set<Value> {
+
+        let values = metadata.filter({ !$1.isDeleted }).map({ $0.key })
+        return Set(values)
+
+    }
+
+    public var count: Int {
+
+        metadata.reduce(0) { result, pair in
+            result + (pair.value.isDeleted ? 0 : 1)
+        }
+    }
 
     public init() {}
 
@@ -30,21 +40,18 @@ public struct LWWORSet<Value: Hashable, Timestamp: Timestampable> {
     public mutating func insert(_ value: Value) -> Bool {
 
         var isNewInsert = false
-        let hashValue = value.hashValue
 
-        if var oldMetadata = metadata[hashValue] {
+        if var oldMetadata = metadata[value] {
 
             isNewInsert = oldMetadata.isDeleted
             oldMetadata.isDeleted = false
             oldMetadata.timestamp.tick()
-            metadata[hashValue] = oldMetadata
+            metadata[value] = oldMetadata
         } else {
 
             isNewInsert = true
-            metadata[hashValue] = Metadata()
+            metadata[value] = Metadata()
         }
-
-        internalSet.insert(value)
 
         return isNewInsert
     }
@@ -52,20 +59,22 @@ public struct LWWORSet<Value: Hashable, Timestamp: Timestampable> {
     @discardableResult
     public mutating func remove(_ value: Value) -> Value? {
 
-        let hashValue = value.hashValue
+        guard
+            var oldMetadata = metadata[value],
+            !oldMetadata.isDeleted
+        else { return nil }
 
-        if  var oldMetadata = metadata[hashValue],
-            !oldMetadata.isDeleted {
+        oldMetadata.isDeleted = true
+        oldMetadata.timestamp.tick()
+        metadata[value] = oldMetadata
 
-            oldMetadata.isDeleted = true
-            oldMetadata.timestamp.tick()
-            metadata[hashValue] = oldMetadata
-        }
-
-        return internalSet.remove(value)
+        return value
     }
 
-    public func contains(_ value: Value) -> Bool { internalSet.contains(value) }
+    public func contains(_ value: Value) -> Bool {
+
+        metadata[value]?.isDeleted == false
+    }
 }
 
 extension LWWORSet: Replicable {
@@ -86,10 +95,6 @@ extension LWWORSet: Replicable {
                 result[keyValuePair.key] = secondMetadata
             }
         }
-
-        result.internalSet = result.internalSet
-            .union(other.internalSet)
-            .filter { result.metadata[$0.hashValue]?.isDeleted == false }
 
         return result
     }
