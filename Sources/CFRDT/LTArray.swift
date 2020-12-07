@@ -31,47 +31,6 @@ public struct LTArray<Element, Timestamp: Timestampable> {
 
     public init() {}
 
-    public mutating func insert(_ newValue: Element, at index: Int) {
-
-        let new = makeEntry(withValue: newValue, forInsertingAtIndex: index)
-        entries.insert(new, at: index)
-    }
-
-    public mutating func insert<Sequence: Swift.Sequence>(contentsOf sequence: Sequence, at index: Int) where Sequence.Element == Element {
-
-        sequence.reversed().forEach { insert($0, at: index) }
-    }
-
-    public mutating func append(_ newValue: Element) { insert(newValue, at: entries.count) }
-
-    public mutating func append<Sequence: Swift.Sequence>(contentsOf sequence: Sequence) where Sequence.Element == Element {
-
-        sequence.forEach { append($0) }
-    }
-
-    @discardableResult
-    public mutating func remove(at index: Int) -> Element {
-
-        var entry = entries[index]
-        let value = entry.value! //swiftlint:disable:this force_unwrapping
-        entry.value = nil
-        entry.tick()
-        tombstones.append(entry)
-        entries.remove(at: index)
-        return value
-    }
-
-    public subscript(bounds: Range<Int>) -> LTArray<Element, Timestamp> {
-
-        get { LTArray(Slice(base: self, bounds: bounds)) }
-
-        set {
-
-            bounds.reversed().forEach { remove(at: $0) }
-            insert(contentsOf: newValue, at: bounds.lowerBound)
-        }
-    }
-
     public subscript(bounds: ClosedRange<Int>) -> LTArray<Element, Timestamp> {
 
         get { self[Range(bounds)] }
@@ -181,13 +140,70 @@ extension LTArray: Collection, RandomAccessCollection {
             entries.insert(newEntry, at: index)
         }
     }
+
+    public subscript(bounds: Range<Int>) -> LTArray<Element, Timestamp> {
+
+        get { LTArray(Slice(base: self, bounds: bounds)) }
+
+        set {
+
+            bounds.reversed().forEach { remove(at: $0) }
+            insert(contentsOf: newValue, at: bounds.lowerBound)
+        }
+    }
 }
 
-extension LTArray {
+extension LTArray: RangeReplaceableCollection {
 
-    init<Sequence: Swift.Sequence>(_ sequence: Sequence) where Sequence.Element == Element {
+    public init<Sequence: Swift.Sequence>(_ sequence: Sequence) where Sequence.Element == Element {
 
         sequence.forEach { append($0) }
+    }
+
+    public mutating func insert(_ newValue: Element, at index: Int) {
+
+        let new = makeEntry(withValue: newValue, forInsertingAtIndex: index)
+        entries.insert(new, at: index)
+    }
+
+    public mutating func insert<Sequence: Swift.Sequence>(contentsOf sequence: Sequence, at index: Int) where Sequence.Element == Element {
+
+        sequence.reversed().forEach { insert($0, at: index) }
+    }
+
+    public mutating func append(_ newValue: Element) { insert(newValue, at: entries.count) }
+
+    public mutating func append<Sequence: Swift.Sequence>(contentsOf sequence: Sequence) where Sequence.Element == Element {
+
+        sequence.forEach { append($0) }
+    }
+
+    @discardableResult
+    public mutating func remove(at index: Int) -> Element {
+
+        var entry = entries[index]
+        let value = entry.value! //swiftlint:disable:this force_unwrapping
+        entry.value = nil
+        entry.tick()
+        tombstones.append(entry)
+        entries.remove(at: index)
+        return value
+    }
+
+    public mutating func removeSubrange(_ bounds: Range<Int>) {
+
+        bounds.reversed().forEach { remove(at: $0) }
+    }
+
+    @discardableResult
+    public mutating func removeFirst() -> Element {
+
+        remove(at: 0)
+    }
+
+    public mutating func removeFirst(_ k: Int) {
+
+        removeSubrange(0 ..< k)
     }
 }
 

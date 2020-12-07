@@ -234,6 +234,29 @@ final class LTArrayTests: XCTestCase {
         XCTAssertEqual(a3, [1,2,3,4,5,6,4,5,6])
     }
 
+    func testRangeReplaceableConformance() {
+
+        var a1 = [1,2,3,4,5]
+        a1.removeSubrange(1...3)
+        XCTAssertEqual(a1, [1,5])
+
+        var a2 = [1,2,3,4,5]
+        a2.removeFirst(3)
+        XCTAssertEqual(a2, [4,5])
+
+        var a3 = [1,2,3,4,5]
+        XCTAssertEqual(a3.removeFirst(), 1)
+        XCTAssertEqual(a3, [2,3,4,5])
+
+        var a4 = [1,2,3,4,5]
+        a4.removeAll()
+        XCTAssertEqual(a4, [])
+
+        var a5 = [1,2,3,4,5]
+        a5.removeAll(where: { $0 % 2 == 0 })
+        XCTAssertEqual(a5, [1,3,5])
+    }
+
     static var allTests = [
         ("testInitialCreation", testInitialCreation),
         ("testAppending", testAppending),
@@ -252,5 +275,6 @@ final class LTArrayTests: XCTestCase {
         ("testRangedSubscript", testRangedSubscript),
         ("testClosedRangeSubscript", testClosedRangeSubscript),
         ("testPartialRangeSubscript", testPartialRangeSubscript),
+        ("testRangeReplaceableConformance", testRangeReplaceableConformance),
     ]
 }
