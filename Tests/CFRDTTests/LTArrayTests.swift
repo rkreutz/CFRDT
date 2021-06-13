@@ -236,27 +236,27 @@ final class LTArrayTests: XCTestCase {
 
     func testRangeReplaceableConformance() {
 
-        var a1 = [1,2,3,4,5]
+        var a1: LTArray<Int, DisambiguousTimeInterval> = [1,2,3,4,5]
         a1.removeSubrange(1...3)
         XCTAssertEqual(a1, [1,5])
 
-        var a2 = [1,2,3,4,5]
+        var a2: LTArray<Int, DisambiguousTimeInterval> = [1,2,3,4,5]
         a2.removeFirst(3)
         XCTAssertEqual(a2, [4,5])
 
-        var a3 = [1,2,3,4,5]
+        var a3: LTArray<Int, DisambiguousTimeInterval> = [1,2,3,4,5]
         XCTAssertEqual(a3.removeFirst(), 1)
         XCTAssertEqual(a3, [2,3,4,5])
 
-        var a4 = [1,2,3,4,5]
+        var a4: LTArray<Int, DisambiguousTimeInterval> = [1,2,3,4,5]
         a4.removeAll()
         XCTAssertEqual(a4, [])
 
-        var a5 = [1,2,3,4,5]
+        var a5: LTArray<Int, DisambiguousTimeInterval> = [1,2,3,4,5]
         a5.removeAll(where: { $0 % 2 == 0 })
         XCTAssertEqual(a5, [1,3,5])
 
-        var a6 = [1,2,3,4,5]
+        var a6: LTArray<Int, DisambiguousTimeInterval> = [1,2,3,4,5]
         a6.replaceSubrange(1...4, with: [6,7,8,9,10])
         XCTAssertEqual(a6, [1,6,7,8,9,10])
     }

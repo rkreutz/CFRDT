@@ -110,3 +110,11 @@ extension LWWORSet: ExpressibleByArrayLiteral {
         self.init(array: elements)
     }
 }
+
+extension LWWORSet {
+
+    func timestamp(for value: Value) -> Timestamp? {
+
+        metadata[value]?.timestamp
+    }
+}
