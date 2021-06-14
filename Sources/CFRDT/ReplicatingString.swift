@@ -26,14 +26,6 @@ extension ReplicatingString: ExpressibleByStringLiteral {
     }
 }
 
-extension ReplicatingString: CustomStringConvertible {
-
-    public var description: String {
-
-        values.map(String.init).joined(separator: "")
-    }
-}
-
 public struct ReplicatingCharacter: Hashable, CustomStringConvertible {
 
     fileprivate var character: Character

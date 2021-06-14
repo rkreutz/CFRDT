@@ -105,6 +105,20 @@ extension LTArray: Replicable {
     }
 }
 
+extension LTArray: CustomStringConvertible where Element: CustomStringConvertible {
+
+    public var description: String {
+
+        if Element.self == ReplicatingCharacter.self {
+
+            return values.map(String.init).joined(separator: "")
+        } else {
+
+            return "[" + values.map(\.description).joined(separator: ", ") + "]"
+        }
+    }
+}
+
 extension LTArray: Equatable where Element: Equatable {
 
     public static func == (lhs: LTArray<Element, Timestamp>, rhs: LTArray<Element, Timestamp>) -> Bool {

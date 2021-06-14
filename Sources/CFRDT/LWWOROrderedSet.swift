@@ -33,12 +33,12 @@ public struct LWWOROrderedSet<Value: Hashable, Timestamp: Timestampable> {
 
     @discardableResult
     public mutating func insert(
-        _ item: Value,
+        value: Value,
         at index: Int
     ) -> (inserted: Bool, index: Int) {
 
-        tombstones.remove(item)
-        return values.insert(InternalElement(value: item), at: index)
+        tombstones.remove(value)
+        return values.insert(InternalElement(value: value), at: index)
     }
 
     @discardableResult
@@ -89,6 +89,11 @@ extension LWWOROrderedSet: ExpressibleByArrayLiteral {
 
         self.init(array: elements)
     }
+}
+
+extension LWWOROrderedSet: CustomStringConvertible where Value: CustomStringConvertible {
+
+    public var description: String { "[" + values.map(\.value.description).joined(separator: ", ") + "]" }
 }
 
 extension LWWOROrderedSet: Equatable {
@@ -414,7 +419,7 @@ extension LWWOROrderedSet: Collection, RandomAccessCollection {
     public subscript(_ index: Int) -> Value {
 
         get { values[index].value }
-        set { insert(newValue, at: index) as Void }
+        set { insert(newValue, at: index) }
     }
 
     public subscript(bounds: Range<Int>) -> LWWOROrderedSet<Value, Timestamp> {
@@ -471,7 +476,7 @@ extension LWWOROrderedSet: RangeReplaceableCollection {
         sequence.reversed().forEach { insert($0, at: index) }
     }
 
-    public mutating func append(_ newValue: Value) { insert(newValue, at: values.count) as Void }
+    public mutating func append(_ newValue: Value) { insert(newValue, at: values.count) }
 
     public mutating func append<Sequence: Swift.Sequence>(contentsOf sequence: Sequence) where Sequence.Element == Value {
 
@@ -488,7 +493,9 @@ extension LWWOROrderedSet: RangeReplaceableCollection {
 
     public mutating func removeSubrange(_ bounds: Range<Int>) {
 
-        bounds.reversed().forEach { remove(at: $0) }
+        bounds.reversed()
+            .filter { $0 < values.count }
+            .forEach { remove(at: $0) }
     }
 
     @discardableResult

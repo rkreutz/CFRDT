@@ -155,9 +155,12 @@ final class LTArrayTests: XCTestCase {
         var c: LTArray<Int, DisambiguousTimeInterval> = [10,11,12]
         c.remove(at: 0)
 
-        let e = a.merged(with: b).merged(with: c)
-        let f = a.merged(with: b.merged(with: c))
+        let d = a.merged(with: b).merged(with: c)
+        let e = a.merged(with: b.merged(with: c))
+        let f = b.merged(with: a.merged(with: c))
+        XCTAssertEqual(d, f)
         XCTAssertEqual(e, f)
+        XCTAssertEqual(f, [11, 12, 5, 6, 7, 1, 3])
     }
 
     func testCodable() {
