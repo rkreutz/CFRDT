@@ -58,8 +58,10 @@ final class LWWRegisterTests: XCTestCase {
     func testAssociativity() {
 
         let c: LWWRegister<Int, DisambiguousTimeInterval> = 3
-        let e = a.merged(with: b).merged(with: c)
-        let f = a.merged(with: b.merged(with: c))
+        let d = a.merged(with: b).merged(with: c)
+        let e = a.merged(with: b.merged(with: c))
+        let f = b.merged(with: a.merged(with: c))
+        XCTAssertEqual(d.value, f.value)
         XCTAssertEqual(e.value, f.value)
     }
 

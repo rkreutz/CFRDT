@@ -157,8 +157,10 @@ final class LWWORSetTests: XCTestCase {
         var c: LWWORSet<Int, DisambiguousTimeInterval> = [10,11,12]
         c.remove(10)
 
-        let e = a.merged(with: b).merged(with: c)
-        let f = a.merged(with: b.merged(with: c))
+        let d = a.merged(with: b).merged(with: c)
+        let e = a.merged(with: b.merged(with: c))
+        let f = b.merged(with: a.merged(with: c))
+        XCTAssertEqual(d.values, f.values)
         XCTAssertEqual(e.values, f.values)
     }
 

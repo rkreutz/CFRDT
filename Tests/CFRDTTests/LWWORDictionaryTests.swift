@@ -172,8 +172,10 @@ final class LWWORDictionaryTests: XCTestCase {
         var c = a!
         c["1"] = nil
 
-        let e = a.merged(with: b).merged(with: c)
-        let f = a.merged(with: b.merged(with: c))
+        let d = a.merged(with: b).merged(with: c)
+        let e = a.merged(with: b.merged(with: c))
+        let f = b.merged(with: a.merged(with: c))
+        XCTAssertEqual(d.values, f.values)
         XCTAssertEqual(e.values, f.values)
     }
 

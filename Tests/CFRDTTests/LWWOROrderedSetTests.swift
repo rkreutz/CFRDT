@@ -199,6 +199,23 @@ final class LWWOROrderedSetTests: XCTestCase {
         XCTAssertEqual(f, [1, 4, 5, 2, 6, 3])
     }
 
+    func testConvolutedMerge() {
+
+        var a: LWWOROrderedSet<Int, DisambiguousTimeInterval> = [1, 2, 3]
+        var copy = a
+
+        a.append(5)
+        a.remove(1)
+        copy.move(1, to: 2)
+        a.insert(contentsOf: [4, 6, 1], at: 1)
+        copy.append(contentsOf: [4, 5, 6])
+
+        XCTAssertEqual(a, [2, 4, 6, 1, 3, 5])
+        XCTAssertEqual(copy, [2, 3, 1, 4, 5, 6])
+        let merge = a.merged(with: copy)
+        XCTAssertEqual(merge, [2, 3, 4, 1, 5, 6])
+    }
+
     static var allTests = [
         ("testEquatable", testEquatable),
         ("testInserting", testInserting),
@@ -215,6 +232,7 @@ final class LWWOROrderedSetTests: XCTestCase {
         ("testMultipleMerges", testMultipleMerges),
         ("testIdempotency", testIdempotency),
         ("testCommutivity", testCommutivity),
-        ("testAssociativity", testAssociativity)
+        ("testAssociativity", testAssociativity),
+        ("testConvolutedMerge", testConvolutedMerge)
     ]
 }
