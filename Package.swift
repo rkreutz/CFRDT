@@ -22,7 +22,7 @@ let package = Package(
         .target(
             name: "CFRDT",
             dependencies: [
-                .product(name: "OrderedCollections", package: "swift-collections")
+                .product(name: "Collections", package: "swift-collections")
             ]
         ),
         .testTarget(

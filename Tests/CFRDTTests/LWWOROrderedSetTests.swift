@@ -138,6 +138,33 @@ final class LWWOROrderedSetTests: XCTestCase {
         XCTAssertEqual(bCopy.merged(with: b), [2, 1, 3])
     }
 
+    func testDeleteThenMerge() {
+
+        let a: LWWOROrderedSet<Int, DisambiguousTimeInterval> = [1, 2, 3]
+        var copy = a
+        copy.remove(2)
+
+        XCTAssertEqual(a.merged(with: copy), [1, 3])
+    }
+
+    func testMoveThenMerge() {
+
+        let a: LWWOROrderedSet<Int, DisambiguousTimeInterval> = [1, 2, 3]
+        var copy = a
+        copy.move(2, to: 2)
+
+        XCTAssertEqual(a.merged(with: copy), [1, 3, 2])
+    }
+
+    func testInsertThenMerge() {
+
+        let a: LWWOROrderedSet<Int, DisambiguousTimeInterval> = [1, 2, 3]
+        var copy = a
+        copy.insert(4, at: 1)
+
+        XCTAssertEqual(a.merged(with: copy), [1, 4, 2, 3])
+    }
+
     func testMergeOfInitiallyUnrelated() {
 
         let a: LWWOROrderedSet<Int, DisambiguousTimeInterval> = [1, 2, 3]
